@@ -21,10 +21,8 @@ env:
 phases:
   install:
     commands:
-      - echo ">>>INSTALL Muhit hazirlanir"
-      - echo "Secilen Versiya: $PYTHON_VERSION"
+      - echo ">>> INSTALL Muhit hazirlanir"
       - pyenv global $PYTHON_VERSION
-      - echo "Hazirki Python versiyasi $PYTHON_VERSION"
       - pip install uv
       - make install
 
