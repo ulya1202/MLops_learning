@@ -1,0 +1,44 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+
+    steps:
+      # 1. Kodu götürürük
+      - uses: actions/checkout@v3
+
+      # 2. UV-ni serverə yükləyirik
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      # 3. Python-u qururuq (Matrix-dəki versiyalarla)
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 4. Asılılıqları yükləyirik
+      - name: Install dependencies
+        run: make install
+
+      # 5. Formatlamanı işə salırıq (Kod səliqəli olsun)
+      - name: Format Code
+        run: make format
+
+      # 6. Linter yoxlaması
+      - name: Lint with Pylint
+        run: make lint
+
+      # 7. Testlər
+      - name: Test with Pytest
+        run: make test
