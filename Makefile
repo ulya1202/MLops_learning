@@ -35,8 +35,7 @@ format:
 	$(RUN_CMD) black $(MAIN_FILE) $(TEST_MAIN_FILE)
 test:
 	@echo "Running tests..."
-	$(RUN_CMD) pytest -vv --cov=add_function $(TEST_MAIN_FILE)
-
+	$(RUN_CMD) pytest -vv --junitxml=test-results.xml --cov=add_function $(TEST_MAIN_FILE)
 lint:
 	@echo "Running lint..."
 	$(RUN_CMD) pylint --disable=R,C $(MAIN_FILE)
