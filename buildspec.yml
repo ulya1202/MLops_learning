@@ -1,8 +1,5 @@
 version: 0.2
 
-# ---------------------------------------------------------
-# 1. BATCH / MATRIX (Paralel Testlər)
-# ---------------------------------------------------------
 batch:
   build-matrix:
     static:
@@ -11,22 +8,16 @@ batch:
       env:
         variables:
           PYTHON_VERSION:
-            - "3.9" 
+            - "3.9"
             - "3.11"
             - "3.12"
 
-# ---------------------------------------------------------
-# 2. ENVIRONMENT VARIABLES
-# ---------------------------------------------------------
 env:
   shell: bash
   variables:
     PROJECT_NAME: "MLOps-Learning"
     ENV_TYPE: "Staging"
 
-# ---------------------------------------------------------
-# 3. PHASES (Zaman Xətti)
-# ---------------------------------------------------------
 phases:
   install:
     runtime-versions:
@@ -37,37 +28,29 @@ phases:
       - pip install uv
       - make install
 
-  build:             
+  build:
     commands:
+
       - echo "Kod formatlanir"
       - make format
       - echo "LINTERING"
       - make lint
       - echo "TESTING"
-      - make test    
+      - make test
 
-# ---------------------------------------------------------
-# 4. REPORTS (Hesabatlar)
-# ---------------------------------------------------------
-reports:             
+reports:
   pytest_reports:
     files:
       - test-results.xml
     base-directory: reports
     file-format: JUNITXML
 
-# ---------------------------------------------------------
-# 5. ARTIFACTS
-# ---------------------------------------------------------
 artifacts:
   files:
     - dist/**/*
     - README.md
   name: build-output-$PYTHON_VERSION
 
-# ---------------------------------------------------------
-# 6. CACHE
-# ---------------------------------------------------------
 cache:
   paths:
     - '/root/.cache/pip'
