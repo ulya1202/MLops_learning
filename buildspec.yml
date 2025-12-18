@@ -20,8 +20,8 @@ phases:
     runtime-versions:
       python: $PYTHON_VERSION
     commands:
-      - echo ">>> [INSTALL] Muhit hazirlanir"
-      - echo "Python versiyasi : $(python --version)"
+      - echo ">>> INSTALL Muhit hazirlanir"
+      - echo "Python versiyasi $(python --version) "
       - pip install uv
       - make install
   build:
