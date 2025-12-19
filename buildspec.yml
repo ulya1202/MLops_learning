@@ -38,9 +38,12 @@ phases:
       - echo ">>> ECR Login"
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
        # IMAGE TAG
+       # Branch adı əlavə et
+      - export BRANCH_NAME=$(echo $CODEBUILD_SOURCE_VERSION | sed 's|/|_|g')
       - export GIT_SHA=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
-      - export IMAGE_TAG="py-${PYTHON_VERSION}-${GIT_SHA}"
+      - export IMAGE_TAG="${BRANCH_NAME}-py-${PYTHON_VERSION}-${GIT_SHA}"
       - echo "🔥 IMAGE_TAG=$IMAGE_TAG"
+     
 
   build:
     commands:
@@ -57,7 +60,13 @@ phases:
   post_build:
     commands:
       - echo ">>> Push image"
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      # Əgər main branch-disə, latest də push et
+      - if [ "$CODEBUILD_SOURCE_VERSION" = "refs/heads/main" ]; then
+          docker tag $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG \
+                     $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest;
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest;
+        fi
+
 
 
 reports:
