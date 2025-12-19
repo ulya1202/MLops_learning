@@ -37,11 +37,10 @@ phases:
     commands:
       - echo ">>> ECR Login"
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-
-
-      # 🔥 TAG HESABLANIR (ƏSAS HİSSƏ)
-      - export IMAGE_TAG="py-${PYTHON_VERSION}"
-      - echo "IMAGE_TAG=$IMAGE_TAG"
+       # IMAGE TAG
+      - export GIT_SHA=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
+      - export IMAGE_TAG="py-${PYTHON_VERSION}-${GIT_SHA}"
+      - echo "🔥 IMAGE_TAG=$IMAGE_TAG"
 
   build:
     commands:
@@ -51,7 +50,7 @@ phases:
       - make test
       - echo ">>> Docker build"
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
 
 
   post_build:
