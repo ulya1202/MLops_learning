@@ -1,7 +1,7 @@
-# 🌐 Dil Seçimi
+# 🌐 Language/Dil 
 
 <details>
-<summary>🇦🇿 Azərbaycan</summary>
+<summary>Azərbaycan</summary>
 
 # 🚀 MLOps-Learning Project
 
