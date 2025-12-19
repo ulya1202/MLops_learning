@@ -17,6 +17,9 @@ env:
   variables:
     PROJECT_NAME: "MLOps-Learning"
     ENV_TYPE: "Staging"
+    AWS_DEFAULT_REGION: "eu-north-1"
+    AWS_ACCOUNT_ID: "618951596025"
+    IMAGE_REPO_NAME: "mlops-learning-repo"
 
 phases:
   install:
@@ -25,15 +28,31 @@ phases:
       - pyenv global $PYTHON_VERSION
       - pip install uv
       - make install
+      # 1. DOCKER-İ İŞƏ SALMAQ (Bu mütləqdir!)
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+
+  pre_build:
+    commands:
+      # 2. ECR-Ə LOGİN OLMAQ (Login olmasan Push edə bilməyəcən)
+      - echo ">>> ECR Login..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
   build:
     commands:
-      - echo "Kod formatlanir"
+      - echo "Klassik addımlar"
       - make format
-      - echo "LINTERING"
       - make lint
-      - echo "TESTING"
       - make test
+      - echo "Docker Image yaradilir..."
+      - docker build -t $IMAGE_REPO_NAME:$PYTHON_VERSION .
+      - docker tag $IMAGE_REPO_NAME:$PYTHON_VERSION $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$PYTHON_VERSION
+
+  post_build:
+    commands:
+      # PUSH (Registry-yə avtomatik qeydiyyat budur)
+      - echo ">>> Image ECR-ə göndərilir..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$PYTHON_VERSION
 
 reports:
   pytest_reports:
