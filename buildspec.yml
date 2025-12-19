@@ -30,20 +30,14 @@ phases:
       - make install
 
       # Docker daemon
-      - nohup /usr/local/bin/dockerd \
-          --host=unix:///var/run/docker.sock \
-          --host=tcp://127.0.0.1:2375 \
-          --storage-driver=overlay2 &
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
 
   pre_build:
     commands:
       - echo ">>> ECR Login"
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION \
-        | docker login \
-          --username AWS \
-          --password-stdin \
-          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+
 
       # 🔥 TAG HESABLANIR (ƏSAS HİSSƏ)
       - export IMAGE_TAG="py-${PYTHON_VERSION}"
@@ -55,19 +49,16 @@ phases:
       - make format
       - make lint
       - make test
-
       - echo ">>> Docker build"
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - docker tag \
-          $IMAGE_REPO_NAME:$IMAGE_TAG \
-          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
   post_build:
     commands:
       - echo ">>> Push image"
-      - docker push \
-          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+
 
 reports:
   pytest_reports:
