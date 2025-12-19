@@ -26,6 +26,7 @@ phases:
     commands:
       - echo ">>> INSTALL Muhit hazirlanir"
       - pyenv global $PYTHON_VERSION
+      - export PYTHON_VERSION=$PYTHON_VERSION
       - pip install uv
       - make install
       # 1. DOCKER-İ İŞƏ SALMAQ (Bu mütləqdir!)
@@ -45,7 +46,7 @@ phases:
       - make lint
       - make test
       - echo "Docker Image yaradilir..."
-      - docker build -t $IMAGE_REPO_NAME:$PYTHON_VERSION .
+      - docker build -t "$IMAGE_REPO_NAME:$PYTHON_VERSION" .
       - docker tag $IMAGE_REPO_NAME:$PYTHON_VERSION $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$PYTHON_VERSION
 
   post_build:
